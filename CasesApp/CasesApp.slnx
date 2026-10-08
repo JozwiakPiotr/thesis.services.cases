@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="CasesApp.ApiService/CasesApp.ApiService.csproj" />
+  <Project Path="CasesApp.AppHost/CasesApp.AppHost.csproj" />
+  <Project Path="CasesApp.ServiceDefaults/CasesApp.ServiceDefaults.csproj" />
+  <Project Path="CasesApp.Tests/CasesApp.Tests.csproj" />
+  <Project Path="CasesApp.Web/CasesApp.Web.csproj" />
+</Solution>
