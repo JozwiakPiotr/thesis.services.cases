@@ -5,10 +5,15 @@
     "version": "1.0.0",
     "description": "Debt case management service"
   },
-  "servers": [],
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
   "paths": {
     "/cases": {
       "post": {
+        "summary": "Adds new debt case",
         "operationId": "AddCase",
         "responses": {
           "204": {
@@ -22,7 +27,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DebtCase"
+                "$ref": "#/components/schemas/CreateDebtCaseRequest"
               }
             }
           }
@@ -32,33 +37,48 @@
   },
   "components": {
     "schemas": {
-      "DebtCase": {
+      "CreateDebtCaseRequest": {
         "type": "object",
         "properties": {
-          "CaseNumber": {
-            "type": "string"
-          },
-          "CreditorId": {
+          "creditorId": {
+            "description": "ID of creditor on whose behalf debt collection will be conducted",
             "type": "string",
             "format": "uuid"
           },
-          "TotalPrincipalAmount": {
-            "type": "string"
-          },
-          "DefaultDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "Debtor": {
+          "debtor": {
             "$ref": "#/components/schemas/Debtor"
+          },
+          "externalReferenceNumber": {
+            "description": "Source contract, loan agreement, or invoice reference number",
+            "type": "string",
+            "example": "KRED/2026/01"
+          },
+          "documentNumber": {
+            "description": "Date when the underlying contract or invoice was issued",
+            "type": "string",
+            "format": "Date",
+            "example": "2026-02-01"
+          },
+          "issueDate": {
+            "description": "Date when the underlying contract or invoice was issued",
+            "type": "string",
+            "format": "date",
+            "example": "2026-01-15"
+          },
+          "dueDate": {
+            "description": "Original payment due date used to compute Days Past Due (DPD) metrics",
+            "type": "string",
+            "format": "date",
+            "example": "2026-02-01"
           }
         },
         "required": [
-          "CaseNumber",
-          "CreditorId",
-          "TotalPrincipalAmount",
-          "DefaultDate",
-          "Debtor"
+          "creditorId",
+          "debtor",
+          "externalReferenceNumber",
+          "documentNumber",
+          "issueDate",
+          "dueDate"
         ]
       },
       "DebtorType": {
@@ -124,29 +144,6 @@
           "street",
           "buildingNumber",
           "apartmentNumber"
-        ]
-      },
-      "Invoice": {
-        "type": "object",
-        "properties": {
-          "invoiceNumber": {
-            "type": "string"
-          },
-          "dueDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "originalAmount": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "invoiceNumber",
-          "dueDate",
-          "originalAmount"
         ]
       }
     },
