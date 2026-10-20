@@ -12,6 +12,91 @@
   ],
   "paths": {
     "/cases": {
+      "get": {
+        "summary": "Gets debt cases",
+        "description": "Returns a paginated list of debt cases. All filters are optional.",
+        "operationId": "GetCases",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filters cases by status.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Active"
+              ]
+            }
+          },
+          {
+            "name": "systemEntryDateFrom",
+            "in": "query",
+            "description": "Includes cases introduced into the system on or after this date.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "systemEntryDateTo",
+            "in": "query",
+            "description": "Includes cases introduced into the system on or before this date.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "casePrefix",
+            "in": "query",
+            "description": "Filters cases whose number starts with this prefix.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number, starting at 1.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of cases returned per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of debt cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CasePage"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Adds new debt case",
         "operationId": "AddCase",
@@ -79,6 +164,64 @@
           "documentNumber",
           "issueDate",
           "dueDate"
+        ]
+      },
+      "CasePage": {
+        "type": "object",
+        "description": "A page of debt cases and pagination metadata.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DebtCase"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages"
+        ]
+      },
+      "DebtCase": {
+        "type": "object",
+        "properties": {
+          "caseNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Active"
+            ]
+          },
+          "systemEntryDate": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "caseNumber",
+          "status",
+          "systemEntryDate"
         ]
       },
       "DebtorType": {
