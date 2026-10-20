@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CasesApp.ApiService\CasesApp.ApiService.csproj" />
-    <ProjectReference Include="..\CasesApp.Web\CasesApp.Web.csproj" />
-  </ItemGroup>
+    </ItemGroup>
 
 </Project>
