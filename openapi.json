@@ -96,6 +96,41 @@
             }
           }
         }
+        ,
+        "/cases/commands/activate": {
+          "post": {
+            "summary": "Activates a debt case",
+            "operationId": "ActivateCase",
+            "responses": {
+              "204": {
+                "description": "Case activated successfully"
+              },
+              "404": {
+                "description": "Case was not found"
+              },
+              "409": {
+                "description": "Case cannot be activated in its current state",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ActivateCaseRequest"
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "post": {
         "summary": "Adds new debt case",
@@ -164,6 +199,17 @@
           "documentNumber",
           "issueDate",
           "dueDate"
+        ]
+      },
+      "ActivateCaseRequest": {
+        "type": "object",
+        "properties": {
+          "caseNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "caseNumber"
         ]
       },
       "CasePage": {

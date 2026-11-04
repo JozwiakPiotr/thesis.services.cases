@@ -20,3 +20,6 @@
 
 ## narzędzia
 https://platform.openai.com/tokenizer
+
+# Trello
+https://trello.com/b/aZhT702Y/debt-collection
