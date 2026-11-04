@@ -1,0 +1,298 @@
+@page "/"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>Debt cases</PageTitle>
+
+<h1>Debt cases</h1>
+
+<section class="card mb-4">
+    <h2>Add case</h2>
+    <EditForm Model="form" OnValidSubmit="CreateCaseAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="creditorId">Creditor ID</label>
+                <InputText id="creditorId" class="form-control" @bind-Value="form.CreditorId" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="externalReferenceNumber">External reference</label>
+                <InputText id="externalReferenceNumber" class="form-control" @bind-Value="form.ExternalReferenceNumber" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="documentNumber">Document number</label>
+                <InputText id="documentNumber" class="form-control" @bind-Value="form.DocumentNumber" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="issueDate">Issue date</label>
+                <InputDate id="issueDate" class="form-control" @bind-Value="form.IssueDate" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="dueDate">Due date</label>
+                <InputDate id="dueDate" class="form-control" @bind-Value="form.DueDate" />
+            </div>
+        </div>
+
+        <h3 class="mt-4">Debtor</h3>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="name">Name</label>
+                <InputText id="name" class="form-control" @bind-Value="form.Debtor.Name" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="taxId">Tax ID</label>
+                <InputText id="taxId" class="form-control" @bind-Value="form.Debtor.TaxId" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="country">Country</label>
+                <InputText id="country" class="form-control" @bind-Value="form.Debtor.Address.Country" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="city">City</label>
+                <InputText id="city" class="form-control" @bind-Value="form.Debtor.Address.City" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="postalCode">Postal code</label>
+                <InputText id="postalCode" class="form-control" @bind-Value="form.Debtor.Address.PostalCode" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="street">Street</label>
+                <InputText id="street" class="form-control" @bind-Value="form.Debtor.Address.Street" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="buildingNumber">Building number</label>
+                <InputText id="buildingNumber" class="form-control" @bind-Value="form.Debtor.Address.BuildingNumber" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="apartmentNumber">Apartment number</label>
+                <InputText id="apartmentNumber" class="form-control" @bind-Value="form.Debtor.Address.ApartmentNumber" />
+            </div>
+        </div>
+
+        <button class="btn btn-primary mt-4" type="submit" disabled="@isSubmitting">Add case</button>
+        @if (message is not null)
+        {
+            <div class="alert @messageClass mt-3" role="alert">@message</div>
+        }
+    </EditForm>
+</section>
+
+<section class="card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Existing cases</h2>
+        <button class="btn btn-outline-secondary" @onclick="LoadCasesAsync" disabled="@isLoading">Refresh</button>
+    </div>
+
+    @if (isLoading)
+    {
+        <p>Loading...</p>
+    }
+    else if (cases.Count == 0)
+    {
+        <p>No cases found.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Case number</th>
+                    <th>Status</th>
+                    <th>System entry date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in cases)
+                {
+                    <tr>
+                        <td>@item.CaseNumber</td>
+                        <td>@item.Status</td>
+                        <td>@item.SystemEntryDate</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-between align-items-center">
+            <span>Page @currentPage of @totalPages (@totalItems items)</span>
+            <div>
+                <button class="btn btn-outline-secondary me-2" @onclick="PreviousPageAsync" disabled="@(currentPage <= 1 || isLoading)">Previous</button>
+                <button class="btn btn-outline-secondary" @onclick="NextPageAsync" disabled="@(currentPage >= totalPages || isLoading)">Next</button>
+            </div>
+        </div>
+    }
+</section>
+
+@code {
+    private readonly CaseForm form = new();
+    private readonly List<CaseListItem> cases = [];
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private int totalItems;
+    private bool isLoading = true;
+    private bool isSubmitting;
+    private string? message;
+    private string messageClass = "alert-info";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCasesAsync();
+    }
+
+    private async Task CreateCaseAsync()
+    {
+        isSubmitting = true;
+        message = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("CasesApi");
+            var request = new CreateCaseRequest(
+                Guid.Parse(form.CreditorId),
+                new DebtorRequest(
+                    form.Debtor.Name,
+                    form.Debtor.TaxId,
+                    [new AddressRequest(
+                        form.Debtor.Address.Country,
+                        form.Debtor.Address.City,
+                        form.Debtor.Address.PostalCode,
+                        form.Debtor.Address.Street,
+                        form.Debtor.Address.BuildingNumber,
+                        form.Debtor.Address.ApartmentNumber)]),
+                form.ExternalReferenceNumber,
+                form.DocumentNumber,
+                form.IssueDate,
+                form.DueDate);
+
+            using var response = await client.PostAsJsonAsync("api/cases", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                message = $"Could not add case ({(int)response.StatusCode}).";
+                messageClass = "alert-danger";
+                return;
+            }
+
+            message = "Case added successfully.";
+            messageClass = "alert-success";
+            currentPage = 1;
+            await LoadCasesAsync();
+        }
+        catch (Exception exception) when (exception is FormatException or HttpRequestException)
+        {
+            message = "Could not add case. Check the entered data and try again.";
+            messageClass = "alert-danger";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task LoadCasesAsync()
+    {
+        isLoading = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("CasesApi");
+            var result = await client.GetFromJsonAsync<CasePage>(
+                $"api/cases?page={currentPage}&pageSize=10");
+
+            cases.Clear();
+            if (result is not null)
+            {
+                cases.AddRange(result.Items);
+                totalPages = Math.Max(result.TotalPages, 1);
+                totalItems = result.TotalItems;
+            }
+        }
+        catch (HttpRequestException)
+        {
+            message = "Could not load cases.";
+            messageClass = "alert-danger";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task PreviousPageAsync()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await LoadCasesAsync();
+        }
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            await LoadCasesAsync();
+        }
+    }
+
+    private sealed class CaseForm
+    {
+        public string CreditorId { get; set; } = Guid.NewGuid().ToString();
+        public string ExternalReferenceNumber { get; set; } = string.Empty;
+        public string DocumentNumber { get; set; } = string.Empty;
+        public DateOnly IssueDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public DateOnly DueDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public DebtorForm Debtor { get; } = new();
+    }
+
+    private sealed class DebtorForm
+    {
+        public string Name { get; set; } = string.Empty;
+        public string TaxId { get; set; } = string.Empty;
+        public AddressForm Address { get; } = new();
+    }
+
+    private sealed class AddressForm
+    {
+        public string Country { get; set; } = "PL";
+        public string City { get; set; } = string.Empty;
+        public string PostalCode { get; set; } = string.Empty;
+        public string? Street { get; set; }
+        public string BuildingNumber { get; set; } = string.Empty;
+        public string? ApartmentNumber { get; set; }
+    }
+
+    private sealed record CreateCaseRequest(
+        Guid CreditorId,
+        DebtorRequest Debtor,
+        string ExternalReferenceNumber,
+        string DocumentNumber,
+        DateOnly IssueDate,
+        DateOnly DueDate);
+
+    private sealed record DebtorRequest(
+        string Name,
+        string TaxId,
+        IReadOnlyList<AddressRequest> Addresses);
+
+    private sealed record AddressRequest(
+        string Country,
+        string City,
+        string PostalCode,
+        string? Street,
+        string BuildingNumber,
+        string? ApartmentNumber);
+
+    private sealed record CasePage(
+        IReadOnlyList<CaseListItem> Items,
+        int Page,
+        int PageSize,
+        int TotalItems,
+        int TotalPages);
+
+    private sealed record CaseListItem(
+        string CaseNumber,
+        string Status,
+        DateOnly SystemEntryDate);
+}

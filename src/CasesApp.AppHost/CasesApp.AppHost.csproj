@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CasesApp.ApiService\CasesApp.ApiService.csproj" />
+    <ProjectReference Include="..\DebtorApp\DebtorApp.csproj" />
+    <ProjectReference Include="..\PaymentsApp.ApiService\PaymentsApp.ApiService.csproj" />
     </ItemGroup>
 
   <ItemGroup>

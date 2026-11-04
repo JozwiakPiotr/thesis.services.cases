@@ -1,0 +1,17 @@
+.topbar {
+    background: #172033;
+    color: white;
+    padding: 1rem 2rem;
+}
+
+.brand {
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.page {
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 2rem;
+}

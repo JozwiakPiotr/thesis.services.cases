@@ -1,0 +1,18 @@
+@PaymentsApp_HostAddress = http://localhost:5589
+
+### Create a financial account
+POST {{PaymentsApp_HostAddress}}/api/accounts
+Content-Type: application/json
+
+{
+  "caseId": "00000000-0000-0000-0000-000000000001",
+  "currency": "PLN",
+  "principalOriginal": 10000.00,
+  "interestAccrued": 250.00,
+  "additionalCosts": 100.00,
+  "handoverDate": "2026-11-04"
+}
+
+### Get account balance
+GET {{PaymentsApp_HostAddress}}/api/accounts/00000000-0000-0000-0000-000000000001/balance
+Accept: application/json
