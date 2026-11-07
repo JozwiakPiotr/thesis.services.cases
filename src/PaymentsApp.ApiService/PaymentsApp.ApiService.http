@@ -1,8 +1,19 @@
 @PaymentsApp_HostAddress = http://localhost:5589
+@Keycloak_HostAddress = http://localhost:8080
+
+### Get a token from Keycloak (copy the access_token into @accessToken)
+POST {{Keycloak_HostAddress}}/realms/cases/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=api&username=demo&password=demo&grant_type=password
+
+###
+@accessToken = paste-token-here
 
 ### Create a financial account
 POST {{PaymentsApp_HostAddress}}/api/accounts
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "caseId": "00000000-0000-0000-0000-000000000001",
@@ -16,3 +27,4 @@ Content-Type: application/json
 ### Get account balance
 GET {{PaymentsApp_HostAddress}}/api/accounts/00000000-0000-0000-0000-000000000001/balance
 Accept: application/json
+Authorization: Bearer {{accessToken}}

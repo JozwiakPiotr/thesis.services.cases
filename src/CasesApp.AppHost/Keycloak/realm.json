@@ -1,0 +1,80 @@
+{
+  "realm": "cases",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "api",
+      "name": "Cases and payments APIs",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "debtorapp",
+      "name": "Debtor web application",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:5590/signin-oidc",
+        "https://localhost:7338/signin-oidc",
+        "http://192.168.102.1:5590/signin-oidc",
+        "https://192.168.102.1:7338/signin-oidc"
+      ],
+      "webOrigins": [
+        "http://localhost:5590",
+        "https://localhost:7338",
+        "http://192.168.102.1:5590",
+        "https://192.168.102.1:7338"
+      ],
+      "protocolMappers": [
+        {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:5590/*##https://localhost:7338/*##http://192.168.102.1:5590/*##https://192.168.102.1:7338/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "demo",
+      "email": "demo@example.com",
+      "firstName": "Demo",
+      "lastName": "User",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

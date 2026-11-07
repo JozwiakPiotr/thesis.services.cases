@@ -1,0 +1,11 @@
+apiVersion: "v2"
+name: "cases-app"
+version: "1.0.0"
+kubeVersion: ">= 1.18.0-0"
+description: "Cases and payments services"
+type: "application"
+keywords:
+  - "aspire"
+  - "kubernetes"
+appVersion: "1.0.0"
+deprecated: false

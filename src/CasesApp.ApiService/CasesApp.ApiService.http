@@ -1,6 +1,17 @@
 @ApiService_HostAddress = http://localhost:5588
+@Keycloak_HostAddress = http://localhost:8080
 
-GET {{ApiService_HostAddress}}/weatherforecast/
+### Get a token from Keycloak (copy the access_token into @accessToken)
+POST {{Keycloak_HostAddress}}/realms/cases/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=api&username=demo&password=demo&grant_type=password
+
+###
+@accessToken = paste-token-here
+
+GET {{ApiService_HostAddress}}/
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ###

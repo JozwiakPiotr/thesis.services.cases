@@ -1,0 +1,23 @@
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "apiservice-config"
+  labels:
+    app.kubernetes.io/name: "{{ .Chart.Name }}"
+    app.kubernetes.io/component: "apiservice"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+data:
+  OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "{{ .Values.config.apiservice.OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY }}"
+  ASPNETCORE_FORWARDEDHEADERS_ENABLED: "{{ .Values.config.apiservice.ASPNETCORE_FORWARDEDHEADERS_ENABLED }}"
+  HTTP_PORTS: "{{ .Values.parameters.apiservice.port_http | int | toString }}"
+  CASES_HOST: "{{ .Values.config.apiservice.CASES_HOST }}"
+  CASES_PORT: "{{ .Values.config.apiservice.CASES_PORT }}"
+  CASES_USERNAME: "{{ .Values.config.apiservice.CASES_USERNAME }}"
+  CASES_JDBCCONNECTIONSTRING: "{{ .Values.config.apiservice.CASES_JDBCCONNECTIONSTRING }}"
+  CASES_DATABASENAME: "{{ .Values.config.apiservice.CASES_DATABASENAME }}"
+  KEYCLOAK_HTTP: "{{ .Values.config.apiservice.KEYCLOAK_HTTP }}"
+  services__keycloak__http__0: "{{ .Values.config.apiservice.services__keycloak__http__0 }}"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "{{ .Values.config.apiservice.OTEL_EXPORTER_OTLP_ENDPOINT }}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "{{ .Values.config.apiservice.OTEL_EXPORTER_OTLP_PROTOCOL }}"
+  OTEL_SERVICE_NAME: "{{ .Values.config.apiservice.OTEL_SERVICE_NAME }}"

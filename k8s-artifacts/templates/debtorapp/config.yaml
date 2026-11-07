@@ -1,0 +1,19 @@
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "debtorapp-config"
+  labels:
+    app.kubernetes.io/name: "{{ .Chart.Name }}"
+    app.kubernetes.io/component: "debtorapp"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+data:
+  OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "{{ .Values.config.debtorapp.OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY }}"
+  ASPNETCORE_FORWARDEDHEADERS_ENABLED: "{{ .Values.config.debtorapp.ASPNETCORE_FORWARDEDHEADERS_ENABLED }}"
+  HTTP_PORTS: "{{ .Values.parameters.debtorapp.port_http | int | toString }}"
+  APISERVICE_HTTP: "http://apiservice-service:{{ .Values.parameters.apiservice.port_http }}"
+  services__apiservice__http__0: "http://apiservice-service:{{ .Values.parameters.apiservice.port_http }}"
+  APISERVICE_HTTPS: "https://apiservice-service:{{ .Values.parameters.apiservice.port_http }}"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "{{ .Values.config.debtorapp.OTEL_EXPORTER_OTLP_ENDPOINT }}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "{{ .Values.config.debtorapp.OTEL_EXPORTER_OTLP_PROTOCOL }}"
+  OTEL_SERVICE_NAME: "{{ .Values.config.debtorapp.OTEL_SERVICE_NAME }}"

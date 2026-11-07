@@ -1,0 +1,73 @@
+parameters:
+  apiservice:
+    port_http: 8080
+    apiservice_image: "apiservice:latest"
+  debtorapp:
+    port_http: 8080
+    debtorapp_image: "debtorapp:latest"
+  paymentsapi:
+    port_http: 8080
+    paymentsapi_image: "paymentsapi:latest"
+secrets:
+  keycloak:
+    keycloak_password: ""
+  postgres:
+    postgres_password: ""
+  apiservice:
+    ConnectionStrings__cases: ""
+    postgres_password: ""
+    CASES_URI: ""
+  paymentsapi:
+    ConnectionStrings__payments: ""
+    postgres_password: ""
+    PAYMENTS_URI: ""
+config:
+  keycloak:
+    KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+    KC_HEALTH_ENABLED: "true"
+    KC_FEATURES: "opentelemetry"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://k8s-dashboard-service:18889"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+    OTEL_SERVICE_NAME: "keycloak"
+  postgres:
+    POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+    POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+    POSTGRES_USER: "postgres"
+  apiservice:
+    OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+    ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    HTTP_PORTS: ""
+    CASES_HOST: "postgres-service"
+    CASES_PORT: "5432"
+    CASES_USERNAME: "postgres"
+    CASES_JDBCCONNECTIONSTRING: "jdbc:postgresql://postgres-service:5432/cases"
+    CASES_DATABASENAME: "cases"
+    KEYCLOAK_HTTP: "http://keycloak-service:8080"
+    services__keycloak__http__0: "http://keycloak-service:8080"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://k8s-dashboard-service:18889"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+    OTEL_SERVICE_NAME: "apiservice"
+  debtorapp:
+    OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+    ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    HTTP_PORTS: ""
+    APISERVICE_HTTP: ""
+    services__apiservice__http__0: ""
+    APISERVICE_HTTPS: ""
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://k8s-dashboard-service:18889"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+    OTEL_SERVICE_NAME: "debtorapp"
+  paymentsapi:
+    OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+    ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    HTTP_PORTS: ""
+    PAYMENTS_HOST: "postgres-service"
+    PAYMENTS_PORT: "5432"
+    PAYMENTS_USERNAME: "postgres"
+    PAYMENTS_JDBCCONNECTIONSTRING: "jdbc:postgresql://postgres-service:5432/payments"
+    PAYMENTS_DATABASENAME: "payments"
+    KEYCLOAK_HTTP: "http://keycloak-service:8080"
+    services__keycloak__http__0: "http://keycloak-service:8080"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://k8s-dashboard-service:18889"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+    OTEL_SERVICE_NAME: "paymentsapi"

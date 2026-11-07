@@ -1,0 +1,23 @@
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "paymentsapi-config"
+  labels:
+    app.kubernetes.io/name: "{{ .Chart.Name }}"
+    app.kubernetes.io/component: "paymentsapi"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+data:
+  OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "{{ .Values.config.paymentsapi.OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY }}"
+  ASPNETCORE_FORWARDEDHEADERS_ENABLED: "{{ .Values.config.paymentsapi.ASPNETCORE_FORWARDEDHEADERS_ENABLED }}"
+  HTTP_PORTS: "{{ .Values.parameters.paymentsapi.port_http | int | toString }}"
+  PAYMENTS_HOST: "{{ .Values.config.paymentsapi.PAYMENTS_HOST }}"
+  PAYMENTS_PORT: "{{ .Values.config.paymentsapi.PAYMENTS_PORT }}"
+  PAYMENTS_USERNAME: "{{ .Values.config.paymentsapi.PAYMENTS_USERNAME }}"
+  PAYMENTS_JDBCCONNECTIONSTRING: "{{ .Values.config.paymentsapi.PAYMENTS_JDBCCONNECTIONSTRING }}"
+  PAYMENTS_DATABASENAME: "{{ .Values.config.paymentsapi.PAYMENTS_DATABASENAME }}"
+  KEYCLOAK_HTTP: "{{ .Values.config.paymentsapi.KEYCLOAK_HTTP }}"
+  services__keycloak__http__0: "{{ .Values.config.paymentsapi.services__keycloak__http__0 }}"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "{{ .Values.config.paymentsapi.OTEL_EXPORTER_OTLP_ENDPOINT }}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "{{ .Values.config.paymentsapi.OTEL_EXPORTER_OTLP_PROTOCOL }}"
+  OTEL_SERVICE_NAME: "{{ .Values.config.paymentsapi.OTEL_SERVICE_NAME }}"

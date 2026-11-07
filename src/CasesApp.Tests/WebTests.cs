@@ -7,7 +7,7 @@ public class WebTests
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
 
     [Test]
-    public async Task GetWebResourceRootReturnsOkStatusCode()
+    public async Task GetWebResourceRootRequiresAuthentication()
     {
         // Arrange
         var cancellationToken = TestContext.CurrentContext.CancellationToken;
@@ -34,6 +34,6 @@ public class WebTests
         var response = await httpClient.GetAsync("/", cancellationToken);
 
         // Assert
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
     }
 }
