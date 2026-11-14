@@ -35,13 +35,21 @@
         "http://localhost:5590/signin-oidc",
         "https://localhost:7338/signin-oidc",
         "http://192.168.102.1:5590/signin-oidc",
-        "https://192.168.102.1:7338/signin-oidc"
+        "https://192.168.102.1:7338/signin-oidc",
+        "http://cases.contoso.lab/signin-oidc",
+        "https://cases.contoso.lab/signin-oidc",
+        "http://debtorapp.contoso.lab/signin-oidc",
+        "https://debtorapp.contoso.lab/signin-oidc"
       ],
       "webOrigins": [
         "http://localhost:5590",
         "https://localhost:7338",
         "http://192.168.102.1:5590",
-        "https://192.168.102.1:7338"
+        "https://192.168.102.1:7338",
+        "http://cases.contoso.lab",
+        "https://cases.contoso.lab",
+        "http://debtorapp.contoso.lab",
+        "https://debtorapp.contoso.lab"
       ],
       "protocolMappers": [
         {
@@ -56,7 +64,7 @@
         }
       ],
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:5590/*##https://localhost:7338/*##http://192.168.102.1:5590/*##https://192.168.102.1:7338/*"
+        "post.logout.redirect.uris": "http://localhost:5590/*##https://localhost:7338/*##http://192.168.102.1:5590/*##https://192.168.102.1:7338/*##http://cases.contoso.lab/*##https://cases.contoso.lab/*##http://debtorapp.contoso.lab/*##https://debtorapp.contoso.lab/*"
       }
     }
   ],
