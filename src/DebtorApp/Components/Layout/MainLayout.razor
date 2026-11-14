@@ -2,6 +2,16 @@
 
 <header class="topbar">
     <a class="brand" href="/">Debt cases</a>
+    <AuthorizeView>
+        <Authorized Context="authContext">
+            <span class="user-info">
+                Zalogowany: @(authContext.User.Identity?.Name
+                    ?? authContext.User.FindFirst("preferred_username")?.Value
+                    ?? authContext.User.FindFirst("email")?.Value
+                    ?? "użytkownik")
+            </span>
+        </Authorized>
+    </AuthorizeView>
 </header>
 
 <main class="page">
