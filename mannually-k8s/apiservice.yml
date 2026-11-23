@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: apiservice
+  namespace: cases
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apiservice
+  template:
+    metadata:
+      labels:
+        app: apiservice
+    spec:
+      containers:
+      - name: apiservice
+        image: piotrmaciejjozwiak/apiservice:0.0.1
+        envFrom:
+          - configMapRef:
+              name: apiservice-config
+        ports:
+          - name: http
+            containerPort: 8080
+        imagePullPolicy: IfNotPresent
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apiservice-config
+  namespace: cases
+data:
+  ASPNETCORE_ENVIRONMENT: Development
+  ASPNETCORE_URLS: http://+:8080
+  ConnectionStrings__cases: Host=postgres;Port=5432;Database=cases;Username=postgres;Password=postgres
+  Keycloak__Authority: https://keycloak.contoso.lab/realms/cases
+  Keycloak__MetadataAddress: http://keycloak.cases.svc.cluster.local:8080/realms/cases/.well-known/openid-configuration
+  Keycloak__Audience: api
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: apiservice
+  namespace: cases
+spec:
+  selector:
+    app: apiservice
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

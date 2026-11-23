@@ -2,6 +2,8 @@ using CasesApp.ApiService.Features.DebtCases;
 using CasesApp.ApiService.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,18 +18,34 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = builder.Configuration["Keycloak:Authority"]
+        var authority = builder.Configuration["Keycloak:Authority"]
             ?? throw new InvalidOperationException("Keycloak:Authority configuration is required.");
+        var metadataAddress = builder.Configuration["Keycloak:MetadataAddress"]
+            ?? throw new InvalidOperationException("Keycloak:MetadataAddress configuration is required.");
+        var backchannelBaseAddress = builder.Configuration["Keycloak:BackchannelBaseAddress"]
+            ?? throw new InvalidOperationException(
+                "Keycloak:BackchannelBaseAddress configuration is required.");
+
+        options.Authority = authority;
+        options.MetadataAddress = metadataAddress;
         options.Audience = builder.Configuration["Keycloak:Audience"] ?? "api";
         options.RequireHttpsMetadata = false;
-        if (builder.Environment.IsDevelopment())
+
+        var backchannel = new HttpClient(
+            new KeycloakBackchannelHandler(
+                new Uri(authority),
+                new Uri(backchannelBaseAddress)))
         {
-            options.BackchannelHttpHandler = new HttpClientHandler
+            BaseAddress = new Uri(backchannelBaseAddress)
+        };
+        options.Backchannel = backchannel;
+        options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            metadataAddress,
+            new OpenIdConnectConfigurationRetriever(),
+            new HttpDocumentRetriever(backchannel)
             {
-                ServerCertificateCustomValidationCallback =
-                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-            };
-        }
+                RequireHttps = false
+            });
     });
 builder.Services.AddAuthorization(options =>
 {
@@ -63,3 +81,34 @@ app.MapDebtCaseEndpoints();
 app.MapDefaultEndpoints();
 
 app.Run();
+
+sealed class KeycloakBackchannelHandler(
+    Uri publicBaseAddress,
+    Uri backchannelBaseAddress) : DelegatingHandler(new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback =
+            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    })
+{
+    protected override Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        if (request.RequestUri is Uri uri
+            && uri.Host.Equals(
+                publicBaseAddress.Host,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            request.RequestUri = new UriBuilder(uri)
+            {
+                Scheme = backchannelBaseAddress.Scheme,
+                Host = backchannelBaseAddress.Host,
+                Port = backchannelBaseAddress.IsDefaultPort
+                    ? -1
+                    : backchannelBaseAddress.Port
+            }.Uri;
+        }
+
+        return base.SendAsync(request, cancellationToken);
+    }
+}

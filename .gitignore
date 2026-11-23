@@ -486,3 +486,4 @@ $RECYCLE.BIN/
 # Local TLS certificates and private keys
 secrets/certs/*
 !secrets/certs/.gitkeep
+secrets/

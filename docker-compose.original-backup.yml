@@ -1,0 +1,51 @@
+services:
+  keycloak:
+    build:
+      context: .
+      dockerfile: docker/keycloak/Dockerfile
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: keycloak.contoso.lab
+      KC_PROXY_HEADERS: xforwarded
+      KC_TRUSTSTORE_PATHS: /opt/keycloak/conf/truststore
+    volumes:
+      - ./keycloak.keytab:/opt/keycloak/conf/keycloak.keytab:ro,Z
+      - ./docker/keycloak/krb5.conf:/etc/krb5.conf:ro,Z
+      - ./certs/Contoso-Lab-Root-CA.crt:/opt/keycloak/conf/truststore/Contoso-Lab-Root-CA.crt:ro,z
+      - keycloak_data:/opt/keycloak/data
+    networks:
+      default:
+      kerberos:
+        ipv4_address: 192.168.102.50
+    dns:
+      - 192.168.102.137
+    ports:
+      - "8080:8080"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    depends_on:
+      - keycloak
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro,z
+
+volumes:
+  keycloak_data:
+
+networks:
+  kerberos:
+    driver: macvlan
+    driver_opts:
+      parent: virbr3
+    ipam:
+      config:
+        - subnet: 192.168.102.0/24
+          gateway: 192.168.102.1
+          ip_range: 192.168.102.0/25

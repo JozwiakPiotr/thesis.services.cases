@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: debtorapp
+  namespace: cases
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debtorapp
+  template:
+    metadata:
+      labels:
+        app: debtorapp
+    spec:
+      containers:
+      - name: debtorapp
+        image: piotrmaciejjozwiak/debtorapp:0.0.4
+        envFrom:
+          - configMapRef:
+              name: debtorapp-config
+        ports:
+          - name: http
+            containerPort: 8080
+        imagePullPolicy: IfNotPresent
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: debtorapp-config
+  namespace: cases
+data:
+  ASPNETCORE_ENVIRONMENT: Development
+  ASPNETCORE_URLS: http://+:8080
+  ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+  CasesApi__BaseAddress: http://apiservice.cases.svc.cluster.local:8080
+  Keycloak__Authority: https://keycloak.contoso.lab/realms/cases
+  Keycloak__MetadataAddress: http://keycloak.cases.svc.cluster.local:8080/realms/cases/.well-known/openid-configuration
+  Keycloak__ClientId: debtorapp
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: debtorapp
+  namespace: cases
+spec:
+  selector:
+    app: debtorapp
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wildcard-tls
+  namespace: cases
+type: kubernetes.io/tls
+data:
+  tls.crt: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVURENDQWpTZ0F3SUJBZ0lVTnNMa0Z6MDdNMXRVdGVhZXhmMnNIbm1WOEdjd0RRWUpLb1pJaHZjTkFRRUwKQlFBd1BURWNNQm9HQTFVRUF3d1RRMjl1ZEc5emJ5MU1ZV0l0VW05dmRDMURRVEVRTUE0R0ExVUVDZ3dIUTI5dQpkRzl6YnpFTE1Ba0dBMVVFQmhNQ1VFd3dIaGNOTWpZeE1URXhNVFV5TkRNeVdoY05Namt3TWpFek1UVXlORE15CldqQVlNUll3RkFZRFZRUUREQTBxTG1OdmJuUnZjMjh1YkdGaU1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0MKQVE4QU1JSUJDZ0tDQVFFQXpNRTM0TE8rL25XYmxWLzI4RzIyTTRmRmh4NWtYQ1lTV0lBK1N5a0tST0krNXRyeAphVUtKZFBRekNITmhFVkd1S1diOXpWVnVjQ0VzSENTNWhBVnpzZ3NUNFovZzVzZFBWV3pXRjRHeXZtNXZzUDNHCkp3ZEJSd21yVFd1bHNDN0NnN2FlcnlNK2NLZndBRXRaUjVKSytkdFBZa242OTNXYjA2OWtFaE14UU1MYlFLUGYKc1ZBMHhRYVdaaHNLdmhXT2hVdkI5RzFJcElLVnZCaUZBVVBwbEhOV3NuQzRWN1ZvSHl6dGppYjlEM3czQmpwQwpDOUxJekt6L0dCbkFBQnoxNmdJVmtFbTNsWmZXdEwwdTk2V1VQdzRVbmFpbktaM29uYXBnRktEQmd3Q2x0Y1ZJCitiM3ppUTFtbEg2S3hURTZCMXVZZm1zRkxqMnVXaGNObWhDK3dRSURBUUFCbzJrd1p6QWxCZ05WSFJFRUhqQWMKZ2cwcUxtTnZiblJ2YzI4dWJHRmlnZ3RqYjI1MGIzTnZMbXhoWWpBZEJnTlZIUTRFRmdRVVBqcmxPQVlZVzRDcwpvTGZSWS8vZlRsTERWWnd3SHdZRFZSMGpCQmd3Rm9BVXo3WUtDMWZTWFFDTU9DTlNLNXRLSHhLdE9RY3dEUVlKCktvWklodmNOQVFFTEJRQURnZ0lCQUJpT2FDR3RkcHlBRmM0aHE2dVlhYldNcFU3QWwzVXZKcWp3VTJmM295eisKcXVYRWZXanJpeHhsS1Y4YUwySFY0TUFjbk9MMTNaZ0JIV2ExWWVnOEtYNkw0Tk52aDFzblZySDBPVVB1NiszeApHWndHOUFyb0xndlA1TWNLUVVSanRHYm5FOUszZjhiZEprNzB5bThQcEVUdTRTb2hXUkhjblZEL0JNMVQ3dDI4CmxuTjh1ZERXSnJYVzNMbEdpaUNFbzRiK0RGbGpPUERucW1rYlgraWpvQ3dKdVBTOS9oYUNwNXNaTkR0TjVEb0QKRFg3WXJoSHV4ZXllbENnSlVldCs1Wk9xcW1DYTE1a3IxWWpJa29yS2lBNjU0Z2I5SHJCaWN0cnZvVWNVb0xzUQozdlhUcSs0azE5ZXE2ZGJDK25nV2JlVkZYZmdNb3BlWDVmZW5jSWJtTmZoU3VaNVZ2U3B5Vk9pamkrNXI2T1RTCldnNlYrbW5KTU9qelhFT1BiZlRZa2FBVEd5NWxrMmN0L1VqV1FFd25scjdSSTg0YmdnaWR1R1lxSUJNdG9JL0oKalJDcG1DYllEbUQzQjF1anc5amR6K0Jhb1h3anV0NGk1a2N4WWRvU3lYdWE2ZXNVVTJ0R1dDb0tqc1hhajBPbApQZXl2NWN1enl2MTVoK2NMbGhrQzhCZ1hHcWlvTWMvOXhWVmZvTlFmNXI2RWprcmdpaWd6QWFETVRVWjU3b3NQClJtOXpTcWNjVG9BWUFFeXkwcHp1QUNjdHdTVVdtZFFoS2p4YWZRL3VjRE1zUW1pdGl5OFZqZlM4OEdMc3NrajMKQndJalFuaGFwZ0FnNDBNOFBZK0grY0pqMkppWVNJd045Y3pCWm9sVzk1ZHRUd0FIZlM3ODJVOHpRalBtLzhYSQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+  tls.key: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRRE13VGZnczc3K2RadVYKWC9id2JiWXpoOFdISG1SY0poSllnRDVMS1FwRTRqN20ydkZwUW9sMDlETUljMkVSVWE0cFp2M05WVzV3SVN3YwpKTG1FQlhPeUN4UGhuK0RteDA5VmJOWVhnYksrYm0rdy9jWW5CMEZIQ2F0TmE2V3dMc0tEdHA2dkl6NXdwL0FBClMxbEhra3I1MjA5aVNmcjNkWnZUcjJRU0V6RkF3dHRBbzkreFVEVEZCcFptR3dxK0ZZNkZTOEgwYlVpa2dwVzgKR0lVQlErbVVjMWF5Y0xoWHRXZ2ZMTzJPSnYwUGZEY0dPa0lMMHNqTXJQOFlHY0FBSFBYcUFoV1FTYmVWbDlhMAp2UzczcFpRL0RoU2RxS2NwbmVpZHFtQVVvTUdEQUtXMXhVajV2Zk9KRFdhVWZvckZNVG9IVzVoK2F3VXVQYTVhCkZ3MmFFTDdCQWdNQkFBRUNnZ0VBTHNERjFoQ2xBV3h3V0xUZmFYbmJ1enQ2em9ZUmkzc0VBR0pVRnd4cGRGNG0KMThiUmplUHNDQ0VFa0I3c1lLeUNkS0M0UGswT0dSdHgrNEVsUFRDVGdPbUhvaUxFRTE0YVR0cTVyZ2RtL1pXdworanlRSlBSQ293cGhxNTF6YVYzYis0QlZEbytoSDg4dy9aZzI3Q0ZLN205MTJtOGpGNk1xc0RUaHlFREtvOHNSCmhrZldGMjQwa2JIMjVDUmZKbjdtT0hWQ0c4MXVnY2M3ZTh0SVBLKzcxaE16SnJtcXpNbmdLdWxoQWY2djg2a0EKZnVvR0lzYzF4SjFQNDBhZGNsL3hJNDhwZEJBSHBlQkRYcURqbEU2RFB3MnNSbzIrU25SbkpDN09WczNabW4vMgplWGk5VUFiN0VQTE8ySy9keTlPUzNxVFdLUXBYWis4RURNVzNMY2pUR1FLQmdRRDcyUjU0bzlaMHpRZnZNU2UrCkJNclo3TFM1blI3M1dCUXIwTDBXOFArZ3JrRW5sU21XbCtMVkN5bjVhYlc1UXMxejZrZHhTOXJzRWtySUZhZWkKZ0hEL3ppN0Z1Q000bTlJVU5hVnl3NS91cWZtZ083M0dDZWdtdFJxZVZyQVVGQUs3V2R1d0VxRTQ5RHBTYitJcwpYOW9Uc2pNRkNJTnFGNko1blYySVd0bHRIUUtCZ1FEUUlWbVZzd1EwNWRmdC9HR1BFVTZwZk1ZcmtucVlHZnBzCk9uYnlQaFNIbmdkbEttdFVnL3FPQUVDQnNHanEzdUI5YnVSbTNDZW1kNWlRYytyZTdmSkRVbUl3ekxCWnMyZGIKdC9Ha2ZVWDRBeFNOTjl2MjhNNnlzdDhrWmFOcUl2ZHVxcml6UGtTbGt6RmsySm1ma2lFU0YxYVkvUC8zb2lBQQpKUmRFdnBINjlRS0JnSEx4Y2pYUFdQYXdDUm9ERGtkc2VvU2h3dzRnQnQwT3h3NEVVL2pmZjF2L2k5OGI5Z0kwClNpTy8xNlZzdUxMWUtWcnBKemd2VGJpRzFMaWpJWUpLS3NpbGVyVmt5RFp5NzV1bnJGNUhxSHZOK2c5R2xPT0kKNi9xV2w1S0NzQlJKMmNGV1RxejZvN2lSeHZpTzllUVl6emhFRVlNUGtxTGVMSnBpMXloL2hsS0ZBb0dCQU1PQwpnSC9pUVJKYjBvSUpjYStPUjRGbzUxTW83eWFRU0xDQUh4b2hmUEdFWGxnSEIvbkZYSWtsN1hLbVAzaGFVekVoCkNVY2lpZENUU2Vwd0tYS3V2TVBHME53Y2U1Qlh1Y0Ryd3YrTWVqeW0wQmgwSDVvUnpXa0tKQmt4ck5kWDcyeXkKekh2OEEwb3lRZFVFcnhLNWwzMUNGU1B6alpPV1pVOGRpSVVZSzFNOUFvR0FUTUI4bk1aNVBtMFVLeGlGRWg2UQpBODRIaFhkdTRJeW5MQWdYSysvaGl5V2h1NU1ydmpXU2FGTlhhYkh1TFlOc3gxeDhFRmwrODVIS0FYNktxZE0xCjcvTGl0Z2grSkd4QVlEeFNGRnFrSU1SdWsrY2xSWU1MT254SDFmODNaejJKM2haaEQ0YmN5V3ppUURmcHBWb2EKU1hOZUpiTDdQOTFrSXl6aUNLVHR4dU09Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K"
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  namespace: cases
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "32k"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: "debtorapp"
+spec:
+  tls:
+    - hosts:
+        - debtorapp.contoso.lab
+      secretName: wildcard-tls # <-- tu jest podpięty Secret z tls.crt i key.crt
+  rules:
+    - host: debtorapp.contoso.lab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: debtorapp
+                port:
+                  number: 8080

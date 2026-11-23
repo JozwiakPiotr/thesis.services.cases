@@ -1,0 +1,20 @@
+services:
+  keycloak:
+    networks:
+      - default
+    environment:
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_TRUSTSTORE_PATHS: ""
+
+  apiservice:
+    extra_hosts:
+      - "keycloak.contoso.lab:host-gateway"
+
+  paymentsapi:
+    extra_hosts:
+      - "keycloak.contoso.lab:host-gateway"
+
+  debtorapp:
+    extra_hosts:
+      - "keycloak.contoso.lab:host-gateway"

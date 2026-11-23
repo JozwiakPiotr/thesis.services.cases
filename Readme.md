@@ -1,6 +1,70 @@
+# Openshift
+tuenlowanie
+```bash
+sudo ssh -N \
+-L 6443:192.168.122.123:6443 \
+-L 443:192.168.122.123:443 \
+-L 53:192.168.122.123:53 \
+piotr@hpz840
+```
+
+```bash
+sudo mkdir -p /etc/systemd/resolved.conf.d 
+sudo tee /etc/systemd/resolved.conf.d/contoso.conf > /dev/null << 'EOF'
+[Resolve]
+DNS=192.168.122.123
+Domains=~contoso.lab
+EOF
+sudo systemctl restart systemd-resolved
+```
+ 
+routing do `192.168.122.0/24`
+
+laptop
+```bash
+sudo ip route add 192.168.122.0/24 via 192.168.0.141
+```
+https://docs.redhat.com/en/documentation/openshift_container_platform/5.0/html/registry/setting-up-and-configuring-the-registry#configuring-registry-storage-baremetal
+serwer
+```bash
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# Włącz maskaradę w strefie public
+sudo firewall-cmd --zone=public --add-masquerade
+
+# Utwórz politykę ruchu między public a libvirt
+sudo firewall-cmd --new-policy=public-to-libvirt --permanent
+sudo firewall-cmd --policy=public-to-libvirt --add-ingress-zone=public --permanent
+sudo firewall-cmd --policy=public-to-libvirt --add-egress-zone=libvirt --permanent
+sudo firewall-cmd --policy=public-to-libvirt --set-target=ACCEPT --permanent
+
+# Przeładuj zaporę, aby zastosować zmiany
+sudo firewall-cmd --reload
+```
+
+**dashboard** `https://console-openshift-console.apps.sno.ocp.contoso.lab`
+
+**oc** 
+
+
 # certy AD CS
 
-- [ ] https://damianvandermerwe.com/blog/keycloak-kerberos-sso-active-directory
+- [x] https://damianvandermerwe.com/blog/keycloak-kerberos-sso-active-directory
+- [ ] https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview
+- [ ] https://learn.microsoft.com/en-us/windows/win32/ad/service-principal-names
+- [ ] https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/kerberos-authentication-troubleshooting-guidance
+- [ ] RFC 4120
+- [ ] Microsoft MS-KILE (Kerberos Protocol Extensions)
+- [ ] Red Hat Enterprise Linux – Windows Integration Guide (integracja linux - AD)
+- [ ] Oficjalna dokumentacja MIT Kerberos (MIT Kerberos Documentation)
+- [ ] man krb5.conf
+- [ ] man sssd-ad
+- [ ] man net
+- [ ] kinit
+- [ ] klist
+- [ ] ktutil
+- [ ] RFC 4178 – The Simple and Protected Generic Security Service Application Program Interface (GSS-API) Negotiation Mechanism
+- [ ] RFC 4559 – SPNEGO-based Kerberos and NTLM HTTP Authentication in Microsoft Windows
 
 Wygenerować self signed, dodać GPO, eksportować do kubernetes
 

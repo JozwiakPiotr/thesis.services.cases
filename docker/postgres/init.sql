@@ -1,0 +1,3 @@
+CREATE DATABASE cases;
+CREATE DATABASE payments;
+

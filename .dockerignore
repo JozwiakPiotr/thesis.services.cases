@@ -1,0 +1,9 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+certs/rootCA.key
+certs/wildcard.key
+*.keytab
+
